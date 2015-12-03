@@ -5,20 +5,24 @@
 </head>
 
 <body>
-<p>TEST page</p>
-<!-- 	dx: <div id="dx"></div>
-	dy: <div id="dy"></div>
-	test: <div id="test"></div> -->
+<p>Boucing balls!</p>
 </body>
+
+<label for="amountOfBalls">Amount of balls:</label>
+<input name="amountOfBalls" type="text" id="amountOfBalls" maxlength="1" style="width:50px;"/>
+<button onclick="submitBalls()">Submit</button>
+<br>
 
 <script type="text/javascript">
 
 // Configuration variables
-var canvasWidth = 150;
-var canvasHeight = 100;
-var speed = 1;
-var amountBalls = 4;
-var collisionProximity = 4;
+var canvasWidth = 250;
+var canvasHeight = 150;
+var ballRadius = 5;
+var speed = 1.4;
+var amountBalls = 7;
+var collisionProximity = 5;
+var ballColour = "#000000";
 
 
 // create canvas
@@ -34,22 +38,21 @@ var c = document.getElementById("bouncingBalls");
 var ctx = c.getContext("2d");
 
 // Ball class
-function Ball(positionx, positiony, speed, directionx, directiony) {
+function Ball(positionx, positiony, speed, directionx, directiony, colour) {
 	this.speed = speed;
 	this.positionx = positionx;
 	this.positiony = positiony;
 	this.directionx = directionx;
 	this.directiony = directiony;
+	this.colour = colour;
 }
 
 // Move ball method
 Ball.prototype.moveBall = function() {
-	// document.getElementById("dx").innerHTML = this.positionx;
-	// document.getElementById("dy").innerHTML = this.positiony;
-	
-	ctx.fillStyle = "#000000";
+
+	ctx.fillStyle = this.colour;
 	ctx.beginPath();
-	ctx.arc(this.positionx, this.positiony, 5, 0, 2 * Math.PI);
+	ctx.arc(this.positionx, this.positiony, ballRadius, 0, 2 * Math.PI);
 	ctx.stroke();
 	ctx.closePath();
 	ctx.fill();
@@ -64,26 +67,60 @@ Ball.prototype.moveBall = function() {
 			continue;
 		}
 
+		// check if ball collides with other ball
 		difference = diff(this, that)
-		if(collision(difference)) {
-			// change ball direction
-			this.directionx *= -1;
-			this.directiony *= -1;
+		if(collisionCenkie(difference)) {
 
+			// change ball direction
+			if(this.directionx < 0) {
+				newDirectionx = 1;
+			} else {
+				newDirectionx = -1;
+			}
+			if(this.directiony < 0) {
+				newDirectiony = 1;
+			} else {
+				newDirectiony = -1;
+			}
+
+			this.directionx = (Math.random() * newDirectionx);
+			this.directiony = (Math.sqrt(1 - Math.pow(directionx, 2)) * newDirectiony);
+			
+			this.positionx += (this.directionx * this.speed);
+			this.positiony += (this.directiony * this.speed);
+
+			// if ball still collides then move again
+			while(collisionCenkie(diff(this, that))) {
+				this.positionx += (this.directionx * this.speed);
+				this.positiony += (this.directiony * this.speed);
+			}
+
+			// new position should at the edge of each ball
+			// this.positionx = ;
+			// this.positinony = ;
+			// that.positionx = ;
+			// that.positiony = ;
 		}
 
 	}
 
 	// bounce if ball hits wall
-	if(this.positionx > canvasWidth || this.positionx < 0) {
+	if(this.positionx > canvasWidth) {
 		this.directionx *= -1;
+		this.positionx = canvasWidth - ballRadius;
 	}
-	if(this.positiony > canvasHeight || this.positiony < 0) {
+	if(this.positionx < 0) {
+		this.directionx *= -1;
+		this.positionx = ballRadius;
+	}
+	if(this.positiony > canvasHeight) {
 		this.directiony *= -1;
+		this.positiony = canvasHeight - ballRadius;
 	}
-
-
-
+	if(this.positiony < 0) {
+		this.directiony *= -1;
+		this.positiony = ballRadius;
+	}
 }
 
 // diff of x and y in absolute terms
@@ -95,42 +132,29 @@ function diff(currentBall, otherBall) {
 
 // check if collision
 function collision(diff) {
-	if(diff[0] < collisionProximity && diff[0] > -collisionProximity && diff[1] < collisionProximity && diff[1] > -collisionProximity) {
+	if(diff[0] < collisionProximity && diff[0] > -collisionProximity 
+		&& diff[1] < collisionProximity && diff[1] > -collisionProximity) {
 		return true;
 	}
 	return false;
 }
 
-Ball.prototype.getPositions = function() {
-	return [Math.round(this.positionx), Math.round(this.positiony)];
-}
-
-Ball.prototype.changeDirection = function(axis) {
-	if(axis == 'x') {
-		this.directionx *= -1;
+// Check if there is a collistion. Named after GF who suggested using Pythagoras for measuring distance between balls
+function collisionCenkie(diff) {
+	if((Math.pow(diff[0], 2) + (Math.pow(diff[1], 2))) < (Math.pow((2 * ballRadius), 2))) {
+		return true;
 	}
-	else if(axis == 'y') {
-		this.directionx *= -1;
-	}
-	else if(axis == 'xy') {
-		// this.positionx += this.directionx;
-		// this.positiony += this.directiony;
-		this.directionx *= -1;
-		this.directiony *= -1;
-
-	}
-	else {
-		alert("Error at change direction. It is not x or y of xy...")
-	}
+	return false;
 }
 
 // Create ball
 function createBall() {
-	positionx = Math.round(Math.random()*canvasWidth);
-	positiony = Math.round(Math.random()*canvasHeight);
+	positionx = Math.round(Math.random() * canvasWidth);
+	positiony = Math.round(Math.random() * canvasHeight);
 	directionx = Math.random();
 	directiony = Math.sqrt(1 - Math.pow(directionx, 2));
-	return new Ball(positionx, positiony, speed, directionx, directiony)
+	colour = ballColour;
+	return new Ball(positionx, positiony, speed, directionx, directiony, ballColour)
 }
 
 // Initiate app
@@ -151,14 +175,16 @@ function runApp() {
 	}
 }
 
-Ball.prototype.getDirectionx = function() {
-	return "postionx: " + this.positionx + " postiony: " + this.positiony + " directionx: " + this.directionx;
-}
-
 // Bootstrap this shit
 init();
 setInterval(runApp,2);
 
+// Other methods //
+// Enter amount of ball through textbox
+function submitBalls() {
+	amountBalls = document.getElementById("amountOfBalls").value;
+	init();
+}
 </script>
 
 </html>
