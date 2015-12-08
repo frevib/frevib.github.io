@@ -19,9 +19,9 @@
 var canvasWidth = 250;
 var canvasHeight = 150;
 var ballRadius = 5;
-var speed = 1.4;
+var speed = 1.0;
 var amountBalls = 7;
-var collisionProximity = 5;
+var collisionProximity = 2;
 var ballColour = "#000000";
 
 
@@ -130,18 +130,10 @@ function diff(currentBall, otherBall) {
 	return [diffx, diffy];
 }
 
-// check if collision
-function collision(diff) {
-	if(diff[0] < collisionProximity && diff[0] > -collisionProximity 
-		&& diff[1] < collisionProximity && diff[1] > -collisionProximity) {
-		return true;
-	}
-	return false;
-}
 
 // Check if there is a collistion. Named after GF who suggested using Pythagoras for measuring distance between balls
 function collisionCenkie(diff) {
-	if((Math.pow(diff[0], 2) + (Math.pow(diff[1], 2))) < (Math.pow((2 * ballRadius), 2))) {
+	if((Math.pow(diff[0], 2) + (Math.pow(diff[1], 2))) < (Math.pow((2 * ballRadius - collisionProximity), 2))) {
 		return true;
 	}
 	return false;
