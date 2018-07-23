@@ -2,7 +2,7 @@
 layout: post
 title:  "Raspberry PI with night vision camera and motion detection"
 date:   2018-07-23 20:00:00 +0200
-categories: raspeberry night vision motion detection
+categories: raspberry night vision motion detection
 ---
 This tutorial will describe how to catch your house mouse with a Raspberry pi with a night vision camera and motion detection.
 
